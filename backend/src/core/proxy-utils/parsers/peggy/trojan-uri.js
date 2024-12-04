@@ -82,6 +82,8 @@ port = digits:[0-9]+ {
 params = "?" head:param tail:("&"@param)* {
   proxy["skip-cert-verify"] = toBool(params["allowInsecure"]);
   proxy.sni = params["sni"] || params["peer"];
+  proxy['client-fingerprint'] = params.fp;
+  proxy.alpn = params.alpn ? decodeURIComponent(params.alpn).split(',') : undefined;
 
   if (toBool(params["ws"])) {
     proxy.network = "ws";
@@ -99,6 +101,7 @@ params = "?" head:param tail:("&"@param)* {
         proxy[proxy.network + '-opts'] = {
             'grpc-service-name': params["serviceName"],
             '_grpc-type': params["mode"],
+            '_grpc-authority': params["authority"],
         };
     } else {
       if (params["path"]) {
